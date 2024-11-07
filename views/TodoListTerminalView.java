@@ -4,11 +4,12 @@ import entities.TodoList;
 import services.TodoListService;
 
 import java.util.Scanner;
-public class TodoListTerminalView implements TodoListView{
+
+public class TodoListTerminalView implements TodoListView {
     public static Scanner scanner = new Scanner(System.in);
     private final TodoListService todoListService;
 
-    public TodoListTerminalView(final TodoListService todoListService) {
+    public TodoListTerminalView(TodoListService todoListService) {
         this.todoListService = todoListService;
     }
 
@@ -17,8 +18,7 @@ public class TodoListTerminalView implements TodoListView{
         showMainMenu();
     }
 
-    public static void showMainMenu() {
-        // infinite loop so the program will always run
+    public void showMainMenu() {
         boolean isRunning = true;
         while (isRunning) {
             showTodoList();
@@ -27,7 +27,7 @@ public class TodoListTerminalView implements TodoListView{
             System.out.println("2. Hapus");
             System.out.println("3. Edit");
             System.out.println("4. Keluar");
-            // input untuk menerima input dari user
+
             String selectedMenu = input("Pilih");
 
             switch (selectedMenu) {
@@ -48,30 +48,33 @@ public class TodoListTerminalView implements TodoListView{
             }
         }
     }
+
     public void showMenuAddTodoList() {
         System.out.println("MENAMBAH TODO LIST");
         var todo = input("Todo (x jika batal)");
         if (todo.equals("x")) {
-            // batal
-        } else {
-            todoListService.AddTodolist(todo);
+            return;
         }
+        todoListService.AddTodolist(todo);
     }
 
     public void showMenuRemoveTodoList() {
         System.out.println("MENGHAPUS TODO LIST");
         var number = input("Nomor yang dihapus (x jika batal)");
         if (number.equals("x")) {
-            //batal
-        } else {
-            boolean success = todoListService.removeTodoList(Integer.valueOf(number));
+            return;
+        }
+        try {
+            boolean success = todoListService.removeTodoList(Integer.parseInt(number));
             if (!success) {
-                System.out.println("Gagal menghapus todo list : " + number);
+                System.out.println("Gagal menghapus todo list: " + number);
             }
+        } catch (NumberFormatException e) {
+            System.out.println("Nomor yang dimasukkan tidak valid.");
         }
     }
 
-    public  void showMenuEditTodoList() {
+    public void showMenuEditTodoList() {
         System.out.println("MENGEDIT TODO LIST");
         String selectedTodo = input("Masukkan nomor todo (x jika batal)");
         if (selectedTodo.equals("x")) {
@@ -81,29 +84,31 @@ public class TodoListTerminalView implements TodoListView{
         if (newTodo.equals("x")) {
             return;
         }
-        boolean isEditTodoSuccess = todoListService.editTodoList(Integer.valueOf(selectedTodo), newTodo);
-        if (isEditTodoSuccess) {
-            System.out.println("Berhasil mengedit todo");
-        } else {
-            System.out.println("Gagal mengedit todo");
+        try {
+            boolean isEditTodoSuccess = todoListService.editTodoList(Integer.parseInt(selectedTodo), newTodo);
+            if (isEditTodoSuccess) {
+                System.out.println("Berhasil mengedit todo");
+            } else {
+                System.out.println("Gagal mengedit todo");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Nomor yang dimasukkan tidak valid.");
         }
     }
 
     public String input(String info) {
         System.out.print(info + " : ");
-        var data = scanner.nextLine();
-        return data;
+        return scanner.nextLine();
     }
 
     public void showTodoList() {
         System.out.println("TODO LIST");
         TodoList[] todos = todoListService.getTodoList();
-        for (var i = 0; i < todos.length; i++) {
-            var todo = todos[i];
+        for (int i = 0; i < todos.length; i++) {
+            TodoList todo = todos[i];
             if (todo != null) {
-                System.out.println((i + 1) + ". " + todo);
+                System.out.println((i + 1) + ". " + todo.getTodo());
             }
         }
     }
-
 }
